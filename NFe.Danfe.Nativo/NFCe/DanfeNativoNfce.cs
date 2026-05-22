@@ -21,8 +21,8 @@ using NFe.Danfe.Nativo.Properties;
 using NFe.Utils;
 using NFe.Utils.InformacoesSuplementares;
 using NFe.Utils.NFe;
-using PdfSharpCore.Drawing;
-using PdfSharpCore.Pdf;
+using PdfSharp.Drawing;
+using PdfSharp.Pdf;
 using NFeZeus = NFe.Classes.NFe;
 
 namespace NFe.Danfe.Nativo.NFCe
@@ -157,13 +157,15 @@ namespace NFe.Danfe.Nativo.NFCe
                     PdfPage page = pdf.AddPage();
                     XGraphics gfx = XGraphics.FromPdfPage(page);
 
-                    XImage image = XImage.FromStream(ConverterBytesParaFuncStream(imagemBytes));
+                    using (MemoryStream imgStream = new MemoryStream(imagemBytes))
+                    {
+                        XImage image = XImage.FromStream(imgStream);
 
-                    page.Width = image.PointWidth;
-                    page.Height = image.PointHeight;
+                        page.Width = XUnit.FromPoint(image.PointWidth);
+                        page.Height = XUnit.FromPoint(image.PointHeight);
 
-
-                    gfx.DrawImage(image, 0, 0);
+                        gfx.DrawImage(image, 0, 0);
+                    }
 
                     pdf.Save(stream);
                 }
